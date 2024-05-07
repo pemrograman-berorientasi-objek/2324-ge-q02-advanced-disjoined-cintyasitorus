@@ -250,7 +250,7 @@ public class Driver1 {
                                     courseGrades.put(e.getCourse(), e.getGrade());
                                 }
                             }  
-                        }  
+                        }     
                         // Calculate GPA and total credits using only the latest course grades
                         for (String courseCode : courseGrades.keySet()) {
                             for (Course c : course) {
