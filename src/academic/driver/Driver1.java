@@ -271,7 +271,7 @@ public class Driver1 {
                                         oldgpa += 1 * c.getCredit();
                                     }
                                 }
-                            }
+                            } 
                         }
 
                         // hitung gpa sebeulum dan sesudah remedial
