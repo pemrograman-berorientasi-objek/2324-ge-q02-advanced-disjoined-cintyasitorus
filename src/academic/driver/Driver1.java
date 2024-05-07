@@ -272,7 +272,7 @@ public class Driver1 {
                                     }
                                 }
                             } 
-                        }
+                        } 
 
                         // hitung gpa sebeulum dan sesudah remedial
                         double oldGpa = oldgpa / totalCredit;
@@ -326,7 +326,7 @@ public class Driver1 {
             }
             else if (data[0].equals("enrollment-remedial")) {
 
-                // cek
+                // cek  
                 boolean courseExists = false;
                 for (Course c : course) {
                     if (c.getCode().equals(data[1])) {
