@@ -308,7 +308,7 @@ public class Driver1 {
                                 totalCredit += e.getCourse().getCredit();
                             }
                         }
-                    }
+                    } 
             
                     gpa /= totalCredit;
             
