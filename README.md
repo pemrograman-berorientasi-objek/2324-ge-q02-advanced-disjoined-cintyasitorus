@@ -106,8 +106,7 @@ enrollment-grade#12S1101#12S20003#2020/2021#even#A
 course-history#12S1101
 find-the-best-student#2020/2021#odd
 find-the-best-student#2020/2021#even
-add-best-student#best-studentcari mahasiswa 
-nim pipe nilai di odd slice even
+add-best-student#best-student
 ---
 
 ```   
