@@ -181,6 +181,7 @@ public class Driver1 {
                 // Add enrollment only if course and student exist
                 Enrollment e = new Enrollment(data[1], data[2], data[3], data[4], "None");
                 enrollment.add(e);
+
             } else if (data[0].equals("lecturer-add")) {
                 // buat objek lecturer
                 Lecturer l = new Lecturer(data[1], data[2], data[3], data[4], data[5]);
@@ -339,65 +340,141 @@ public class Driver1 {
                     }
                 }
 
-            } else if (data[0].equals("find-the-best-student")){
-                // find-the-best-student#2020#Information Systems
-                // Map to store student and their GPAs
+            } else if (data[0].equals("find-the-best-student")) {
+                // find-the-best-student#<academic-year>#<semester>
+                String academicYear = data[1];
+                String semester = data[2];
                 Map<Student, Double> studentGpas = new HashMap<>();
+                
                 for (Student s : student) {
-                    if (s.getYear().equals(data[1]) && s.getStudyProgram().equals(data[2])) {
-                        // cek gpa
-                        double gpa = 0.0;
-                        double oldgpa = 0.0;
-                        int totalCredit = 0;
-                        // Map to store course and its grade for the student
-                        Map<String, String> courseGrades = new HashMap<>();
-                        for (Enrollment e : enrollment) {
-                            if (e.getStudent().equals(s.getId())) {
-                                // Only update the course grade if it's not "None"
-                                if (!e.getGrade().equals("None")) {
-                                    courseGrades.put(e.getCourse(), e.getGrade());
-                                }
-                            }  
-                        }     
-                        // Calculate GPA and total credits using only the latest course grades
-                        for (String courseCode : courseGrades.keySet()) {
+                    double totalPoints = 0.0;
+                    int totalCredit = 0;
+                    for (Enrollment e : enrollment) {
+                        if (e.getStudent().equals(s.getId()) && e.getAcademicYear().equals(academicYear) && e.getSemester().equals(semester) && !e.getGrade().equals("None")) {
                             for (Course c : course) {
-                                if (c.getCode().equals(courseCode)) {
+                                if (c.getCode().equals(e.getCourse())) {
                                     totalCredit += c.getCredit();
-                                    String grade = courseGrades.get(courseCode);
+                                    String grade = e.getGrade();
                                     if (grade.equals("A")) {
-                                        oldgpa += 4 * c.getCredit();
+                                        totalPoints += 4 * c.getCredit();
                                     } else if (grade.equals("AB")) {
-                                        oldgpa += 3.5 * c.getCredit();
+                                        totalPoints += 3.5 * c.getCredit();
                                     } else if (grade.equals("B")) {
-                                        oldgpa += 3 * c.getCredit();
+                                        totalPoints += 3 * c.getCredit();
                                     } else if (grade.equals("BC")) {
-                                        oldgpa += 2.5 * c.getCredit();
+                                        totalPoints += 2.5 * c.getCredit();
                                     } else if (grade.equals("C")) {
-                                        oldgpa += 2 * c.getCredit();
+                                        totalPoints += 2 * c.getCredit();
                                     } else if (grade.equals("D")) {
-                                        oldgpa += 1 * c.getCredit();
+                                        totalPoints += 1 * c.getCredit();
                                     }
                                 }
-                            } 
-                        } 
-
-                        // hitung gpa sebeulum dan sesudah remedial
-                        double oldGpa = oldgpa / totalCredit;
-                        studentGpas.put(s, oldGpa);
+                            }
+                        }
+                    }
+                    if (totalCredit > 0) {
+                        double gpa = totalPoints / totalCredit;
+                        studentGpas.put(s, gpa);
                     }
                 }
-                // Sort the students based on their GPA in descending order
+                
                 List<Map.Entry<Student, Double>> sortedStudentGpas = new ArrayList<>(studentGpas.entrySet());
-                Collections.sort(sortedStudentGpas, (a, b) -> b.getValue().compareTo(a.getValue()));
-                // Print the best student
-                if (sortedStudentGpas.size() > 0) {
-                    Student bestStudent = sortedStudentGpas.get(0).getKey();
-                    System.out.println(bestStudent.getId() + "|" + bestStudent.getName() + "|" + bestStudent.getYear() + "|" + bestStudent.getStudyProgram() + "|" + String.format("%.2f", sortedStudentGpas.get(0).getValue()));
+                sortedStudentGpas.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+                
+                // If there is a tie, pick the student with even NIM for even semester
+                if (!sortedStudentGpas.isEmpty()) {
+                    double bestGpa = sortedStudentGpas.get(0).getValue();
+                    List<Student> bestStudents = new ArrayList<>();
+                    for (Map.Entry<Student, Double> entry : sortedStudentGpas) {
+                        if (entry.getValue() == bestGpa) {
+                            bestStudents.add(entry.getKey());
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    Student bestStudent = bestStudents.get(0);
+                    if (bestStudents.size() > 1 && semester.equals("even")) {
+                        for (Student s : bestStudents) {
+                            if (Integer.parseInt(s.getId().substring(s.getId().length() - 1)) % 2 == 0) {
+                                bestStudent = s;
+                                break;
+                            }
+                        }
+                    }
+                    System.out.println(bestStudent.getId() + "|" + bestStudent.getName() + "|" + bestStudent.getYear() + "|" + bestStudent.getStudyProgram() + "|" + String.format("%.2f", bestGpa));
                 } else {
                     System.out.println("No student found");
                 }
+            } else if (data[0].equals("add-the-best-student")) {
+                // add-the-best-student#<academic-year>#<semester>
+                String academicYear = data[1];
+                String semester = data[2];
+                Map<Student, Double> studentGpas = new HashMap<>();
+                
+                for (Student s : student) {
+                    double totalPoints = 0.0;
+                    int totalCredit = 0;
+                    for (Enrollment e : enrollment) {
+                        if (e.getStudent().equals(s.getId()) && e.getAcademicYear().equals(academicYear) && e.getSemester().equals(semester) && !e.getGrade().equals("None")) {
+                            for (Course c : course) {
+                                if (c.getCode().equals(e.getCourse())) {
+                                    totalCredit += c.getCredit();
+                                    String grade = e.getGrade();
+                                    if (grade.equals("A")) {
+                                        totalPoints += 4 * c.getCredit();
+                                    } else if (grade.equals("AB")) {
+                                        totalPoints += 3.5 * c.getCredit();
+                                    } else if (grade.equals("B")) {
+                                        totalPoints += 3 * c.getCredit();
+                                    } else if (grade.equals("BC")) {
+                                        totalPoints += 2.5 * c.getCredit();
+                                    } else if (grade.equals("C")) {
+                                        totalPoints += 2 * c.getCredit();
+                                    } else if (grade.equals("D")) {
+                                        totalPoints += 1 * c.getCredit();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (totalCredit > 0) {
+                        double gpa = totalPoints / totalCredit;
+                        studentGpas.put(s, gpa);
+                    }
+                }
+                
+                List<Map.Entry<Student, Double>> sortedStudentGpas = new ArrayList<>(studentGpas.entrySet());
+                sortedStudentGpas.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+                
+                // If there is a tie, pick the student with even NIM for even semester
+                if (!sortedStudentGpas.isEmpty()) {
+                    double bestGpa = sortedStudentGpas.get(0).getValue();
+                    List<Student> bestStudents = new ArrayList<>();
+                    for (Map.Entry<Student, Double> entry : sortedStudentGpas) {
+                        if (entry.getValue() == bestGpa) {
+                            bestStudents.add(entry.getKey());
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    Student bestStudent = bestStudents.get(0);
+                    if (bestStudents.size() > 1 && semester.equals("even")) {
+                        for (Student s : bestStudents) {
+                            if (Integer.parseInt(s.getId().substring(s.getId().length() - 1)) % 2 == 0) {
+                                bestStudent = s;
+                                break;
+                            }
+                        }
+                    }
+                    student.add(bestStudent);
+                } else {
+                    System.out.println("No student found to add");
+                }
             }
+            
+
         }
 
         // print lecturer
