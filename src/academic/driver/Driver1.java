@@ -204,7 +204,7 @@ public class Driver1 {
                         courseExists = true;
                         break;
                     }
-                }
+                } 
                 // Check if student exists
                 boolean studentExists = false;
                 for (Student s : student) {
